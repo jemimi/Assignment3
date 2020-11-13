@@ -1,0 +1,27 @@
+﻿@model IEnumerable<SchoolProject.Models.Teacher>
+@{
+    ViewBag.Title = "List";
+}
+
+<div id="container">
+<h1>List of Teachers</h1>
+<p>Our awesome instructors</p>
+ 
+ <!--SEARCH BAR not functioning-->
+<form action="/Teacher/List" method="GET">
+    <input type="text" name ="SearchKey" autocomplete ="off"/>
+    <input type="submit" value="Search"/>
+</form>
+
+
+    @foreach (var teacher in Model)
+    {
+        <div class="printTeacher">
+            <div class="col-md-12">
+                <h3><a href="/Teacher/Show/@teacher.TeacherId"> @teacher.TeacherFname @teacher.TeacherLname</a></h3>
+                
+            </div>
+        </div>
+    }
+
+</div>
