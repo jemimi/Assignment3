@@ -38,12 +38,15 @@ namespace SchoolProject.Models
         {
             get
             {
+
                 return "server =" + Server
                     + "; user = " + User
                     + "; database = " + Database
                     + "; port = " + Port
-                    + "; password = " + Password;
-
+                    + "; password = " + Password
+                    + "; convert zero datetime = True"; // for teacher hiredate
+                //convert zero datetime is a db connection setting which returns NULL if the date is 0000-00-00
+                //this can allow C# to have an easier interpretation of the date (no date instead of 0 BCE)
             }
         }
 

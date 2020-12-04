@@ -1,0 +1,26 @@
+﻿@model IEnumerable<SchoolProject.Models.Teacher>
+@{
+    ViewBag.Title = "teacher_setting";
+}
+
+<div>
+    <h2>Staff Directory Search</h2>
+    <form action="/Teacher/List" method="GET">
+        <input type="text" name="SearchKey" autocomplete="off" />
+        <input type="submit" value="Search" />
+    </form>
+
+</div>
+<div id="containershow">
+    <h2>Teacher Directory</h2>
+    <a class="navlink" href="/Teacher/List">Go to Directory</a>
+    <h2>Update </h2>
+    <a class="navlink" href="/Teacher/Update">Back to Teachers</a>
+    <h2>Register New Teacher</h2>
+    <a class="navlink" href="/Teacher/New">Add a new Teacher</a>
+    <h2>Delete Teacher</h2>
+    <a class="navlink" href="/Teacher/DeleteConfirm">Delete Teacher</a>
+
+
+
+</div>

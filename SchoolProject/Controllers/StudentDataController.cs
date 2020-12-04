@@ -13,7 +13,7 @@ namespace SchoolProject.Controllers
     {
 
         // The database context class which allows us to access our MySQL Database.
-        private SchoolDbContext Teachers = new SchoolDbContext(); //1. new instance of a class as blog object
+        private SchoolDbContext School = new SchoolDbContext(); //1. new instance of a class as blog object
 
 
         //This Controller will access the students table of our blog database
@@ -21,14 +21,23 @@ namespace SchoolProject.Controllers
         /// Returns a list of Students in the system
         /// </summary>
         /// <example>GET api/ArticleData/ListSttudents</example>
-        /// <returns>A list of students</returns>
+        /// <returns>A list of articles</returns>
         /// 
 
+        ///<summary>
+        /// returns the search results when a words is typed in the search box
+        /// </summary>
+        /// <param name="StudentSearchKey"></param>
+        /// <returns>returns search results </returns>
+
         [HttpGet]
-        public IEnumerable<Student> ListStudents()
+        //Need to configure the route so that the student search key can be accessed by data access level
+        //{StudentSearchKey} is in reference to the form in Views>Student>list.cshtml 
+        [Route("api/StudentData/ListStudents/{StudentSearchKey}")]
+        public IEnumerable<Student> ListStudents(string StudentSearchKey) //Student is a class from the models.article.cs
         {
             //Create an instance of a connection
-            MySqlConnection Conn = Teachers.AccessDatabase();
+            MySqlConnection Conn = School.AccessDatabase();
 
             //Open the conn or connection between the web server and database
             Conn.Open();
@@ -37,7 +46,13 @@ namespace SchoolProject.Controllers
             MySqlCommand cmd = Conn.CreateCommand();
 
             //SQL Query
-            cmd.CommandText = "select * from students"; //accesses info from students table
+            //accesses info from SQL students table
+            string query = "select * from students where studentfname like @searchkey or studentlname like @searchkey";
+
+            cmd.CommandText = query;
+            cmd.Parameters.AddWithValue("@SearchKey", "%" + StudentSearchKey + "%"); // partial query: SQL"%" + C# parameter + SQL"% 
+            cmd.Prepare();
+
 
             //Gather REsult Set of Query into a variable
             MySqlDataReader ResultSet = cmd.ExecuteReader(); //cmd.executereader is a result set
@@ -49,11 +64,14 @@ namespace SchoolProject.Controllers
             while (ResultSet.Read())
             {
 
+               
+    
                 Student NewStudent = new Student();
 
+                //new student has properties associated to it from database
                 string StudentFname = ResultSet["studentfname"].ToString();
                 string StudentLname = ResultSet["studentlname"].ToString();
-                int StudentID = Convert.ToInt32(ResultSet["studentid"]);
+                int StudentID = Convert.ToInt32(ResultSet["studentid"]); //keep as convert.ToInt32!!!!
 
                 //NewStudent definitions
                 NewStudent.StudentFname = StudentFname;
@@ -76,7 +94,7 @@ namespace SchoolProject.Controllers
         public Student FindStudent(int studentid) //FindStudent links with the StudentController.cs 
         {
             //Create an instance of a connection
-            MySqlConnection Conn = Teachers.AccessDatabase();
+            MySqlConnection Conn = School.AccessDatabase();
 
             //Open the conn or connection between the web server and database
             Conn.Open();

@@ -5,6 +5,11 @@
 
 <h2>Student List</h2>
 
+<form action="/Student/List" method="GET">
+    <input type="text" name="StudentSearchKey"/>
+    <input type="submit" value="Submit!"/>
+</form>
+
 @foreach (var student in Model)
 {
     <div>

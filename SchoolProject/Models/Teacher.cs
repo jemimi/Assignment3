@@ -15,10 +15,14 @@ namespace SchoolProject.Models
         public string TeacherFname;
         public string TeacherLname;
         public string employeenumber;
-        //public DateTime HireDate;
+        public DateTime HireDate;
         public decimal Salary;
 
-        public string WebClassName;  
+
+        // NOTE: create a new model to add teachersxclasses 
+        //public List< Course> ClassesTaught;  
        
+        //parameter-less constructor function
+        public Teacher() { }
     }
 }
