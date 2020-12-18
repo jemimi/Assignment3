@@ -5,22 +5,28 @@
 
 
 <div id="containershow">
+    <nav>
+        <a class="navbar-link" href="/Teacher/List"> Back to Teachers</a>
+    </nav>
     <h2>New Teacher</h2>
 
-    <form method="POST" action="/Teacher/Create">
+    <form method="POST" action="/Teacher/Create" onsubmit="return ValidateTeacher();">
         <div class="inputrow">
-            <h2>First Name</h2>
+            <label for="TeacherFname">First Name</label>
             <input type="text" id="TeacherFname" name="TeacherFname" />
-
-            <h2>Last Name</h2>
-            <input type="text" id="TeacherLname" name="TeacherLname" />
-
-            <div class="inputrow">
-                <input type="submit" value="Create Teacher" />
-
-            </div>
         </div>
 
+        <div class="inputrow">
+            <label for="TeacherLname">Last Name</label>
+            <input type="text" id="TeacherLname" name="TeacherLname" />
+
+        </div>
+        <div class="inputrow">
+                <input type="submit" value="Create Teacher" />
+
+         </div>
+        
+        <div id="ErrorBox" style="display:none;"></div>
 
     </form>
 

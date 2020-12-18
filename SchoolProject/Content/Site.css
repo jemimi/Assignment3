@@ -9,6 +9,9 @@
     padding-right: 15px;
 }
 
+
+
+
 /* Set width on the form input elements since they're 100% wide by default */
 input,
 select,
@@ -16,8 +19,72 @@ textarea {
     max-width: 280px;
 }
 
-background {
-    background-color: #faf9f8;
+nav{
+    overflow: hidden;
+    margin-bottom: 30px;
 }
 
+.navlink{
+    float: left;
+    margin-right: 15px;
+}
 
+.dellink{
+    float: left;
+}
+
+.delbutton{
+    display: block;
+    margin: 0 auto;
+    background: #dd1111;
+    color: #fff;
+    border: 2px solid #000;
+    border-radius: 3px;
+
+}
+
+#containerlist, #containershow, #container {
+    width: 80%;
+    margin: 0 auto;
+    margin-top: 80px;
+}
+
+.listitem {
+    margin: 10px 0;
+}
+
+.inputrow{
+    margin-bottom: 14px;
+    width: 40%;
+    overflow: hidden;
+}
+
+    .inputrow input, .inputrow textarea {
+        float: right;
+    }
+
+    .inputrow textarea {
+        width: 100%;
+        max-width: none;
+        float: none;
+    }
+
+    .inputrow input[type="submit"] {
+        float: none;
+        margin-top: 50px;
+    }
+
+/*
+Each column should be 45.87% wide with a gutter space of 8.25%
+*/
+.col2 {
+    width: 45.87%;
+    float: left;
+    margin-right: 8.25%;
+}
+
+.col2last {
+    width: 45.87%;
+    float: left;
+    margin-right: 0;
+}

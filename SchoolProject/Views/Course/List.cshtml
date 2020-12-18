@@ -3,14 +3,28 @@
     ViewBag.Title = "List";
 }
 
-<h2>Class List</h2>
+<div id="containerlist">
+    <nav>
+        <a class="navlink" href="/Course/New">New Course</a>
+    </nav>
+    <h2>Class List</h2>
 
-@foreach (var Course in Model)
-{
-    <div>
-        <h3><a href="/Course/Show/@Course.CourseId">@Course.CourseName </a></h3>
+    <form action="/Course/List" method="GET">
+        <input type="text" name="SearchKey" autocomplete="off"/>
+        <input type="submit" value="Search" />
+
+    </form>
+
+    @foreach (var Course in Model)
+    {
+        <div class=" = listitem row">
+            <div class="col-md-12">
+                <a href="/Course/Show/@Course.CourseId">@Course.CourseName </a>
+            </div>
 
 
-    </div>
+        </div>
 
-}
+    }
+
+</div>

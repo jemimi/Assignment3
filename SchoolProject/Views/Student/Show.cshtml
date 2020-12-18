@@ -3,8 +3,13 @@
 @{
     ViewBag.Title = "Show";
 }
-<h1>Student Profile: </h1>
-<a class="navlink" href="/Student/List">Back to Student List</a>
+
+<div id="containershow">
+    <h1>Student Profile: </h1>
+    <a class="navlink" href="/Student/List">Back to Student List</a>
+    <a class="navlink" href="/Student/Update/@Model.StudentId"> Update Student profile</a>
+</div>
+
 <div id="container">
     <h2>@Model.StudentFname @Model.StudentLname </h2>
     <h3>Student number: @Model.StudentId</h3>

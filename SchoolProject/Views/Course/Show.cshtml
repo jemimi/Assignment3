@@ -4,11 +4,19 @@
 @{
     ViewBag.Title = "Show";
 }
-<h1>Class Description: </h1>
-<a class="navlink" href="/Course/List">Back to Class List</a>
+
 <div id="containershow">
-    <h2>@Model.CourseName </h2>
+    <nav>
+        <a class="navlink" href="/Course/List">Back to Course</a>
+        <a class="dellink" href="/Course/DeleteConfirm/@Model.CourseId">Delete</a>
+        <a class="navlink" href="/Course/Update/@Model.CourseId">Update Course</a>
+    </nav>
+
+    <h1>@Model.CourseName </h1>
+    <p > Start Date: @Model.StartDate.ToString("yyyy-MM-dd")</p>
+    <p>@Model.CourseCode</p>
     
+
 
 </div>
 

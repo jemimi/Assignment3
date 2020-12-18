@@ -40,15 +40,17 @@ namespace SchoolProject.Controllers
             return View(SelectedTeacher);
         }
 
-        //GET: /Teacher/DeleteConfirm/{id}
+        
+
+        //GET : /Teacher/DeleteConfirm/{id}
         public ActionResult DeleteConfirm(int id)
         {
             TeacherDataController controller = new TeacherDataController();
             Teacher NewTeacher = controller.FindTeacher(id);
 
+
             return View(NewTeacher);
         }
-
 
         //POST: /Teacher/Delete/{id}
         [HttpPost]
@@ -78,7 +80,7 @@ namespace SchoolProject.Controllers
         }
 
         //refers to the view>teacher_setting.cshtml
-        public ActionResult teacher_setting()
+        public ActionResult Teacher_Setting()
         {
             return View();
         }
@@ -87,7 +89,7 @@ namespace SchoolProject.Controllers
 
         //POST: /Teacher/Create
         [HttpPost]
-        public ActionResult Create(string TeacherFname, string TeacherLname)
+        public ActionResult Create(string TeacherFname, string TeacherLname, string EmployeeNumber, DateTime HireDate, decimal Salary )
         {
             //Identify that this method is running
             //Identify the inputs provided from the form
@@ -99,6 +101,10 @@ namespace SchoolProject.Controllers
             Teacher NewTeacher = new Teacher();
             NewTeacher.TeacherFname = TeacherFname;
             NewTeacher.TeacherLname = TeacherLname;
+            NewTeacher.EmployeeNumber EmployeeNumber; //
+            NewTeacher.HireDate = HireDate;
+            NewTeacher.Salary = Salary; 
+
 
             TeacherDataController controller = new TeacherDataController();
             controller.AddTeacher(NewTeacher);

@@ -1,0 +1,33 @@
+﻿
+@{
+    ViewBag.Title = "New";
+}
+
+<div id="containershow">
+    <nav>
+        <a class="navlink" href="/Course/List">Back to Courses</a>
+    </nav>
+
+    <h2>New Course</h2>
+
+    <form method="POST" action="/Course/Create" onsubmit="return ValidateCourse();">
+        <div class="inputrow">
+            <label for="CourseName">Course Name:</label>
+            <textarea name="CourseName" id="CourseName"></textarea>
+        </div>
+
+        <div class="inputrow">
+            <label for="CourseCode">Course Code:</label>
+            <textarea name="CourseCode" id="CourseCode"></textarea>
+        </div>
+
+        <div class="inputrow">
+            <input type="submit" value="Create Course" />
+
+        </div>
+        <div id="ErrorBox" style="display:none;"></div>
+
+    </form>
+
+</div>
+

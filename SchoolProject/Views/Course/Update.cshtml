@@ -1,0 +1,30 @@
+﻿@model SchoolProject.Models.Course
+
+@{
+    ViewBag.Title = "Update";
+}
+
+
+<div id="containerShow">
+     <nav>
+    <a class="navlink" href="/Course/Show/@Model.CourseId">Back</a>
+    </nav>
+    <h2>Update Teacher</h2>
+    <form method="POST" action="/Course/Update/@Model.CourseId" onsubmit="return ValidateCourse();">
+        <div class="inputrow">
+            <label for="CourseName">Course Title:</label>
+            <input type="text" id="CourseName" name="CourseName" value="@Model.CourseName" />
+
+        </div>
+        <div class="inputrow">
+            <label for="CourseCode">CourseCode:</label>
+            <textarea name="CourseCode" id="CourseCode">@Model.CourseCode</textarea>
+
+        </div>
+        <div class="inputrow">
+            <input type="submit" value="Update Course" />
+        </div>
+        <div id="ErrorBox" style="display:none;"></div>
+    </form>
+</div>
+

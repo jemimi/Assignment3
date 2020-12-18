@@ -1,0 +1,38 @@
+﻿@model SchoolProject.Models.Student
+
+@{
+    ViewBag.Title = "Update";
+}
+<!-- update is the combination of the new.cshtml and the show.cshtml. We want to still show
+    the existing information about the student to be modified or updated-->
+
+
+<h2>Update</h2>
+
+
+<div id="containershow">
+    <nav>
+        <a class="navbar-link" href="/Student/Show/@Model.StudentId"> Back</a>
+    </nav>
+    <h2>Update Student</h2>
+
+    <form method="POST" action="/Student/Update/@Model.StudentId">
+        <div class="inputrow">
+            <h2>First Name</h2>
+            <input type="text" id="StudentrFname" name="StudentFname" value="@Model.StudentFname" />
+
+        </div>
+        <div class="inputrow">
+            <h2>Last Name</h2>
+            <input type="text" id="StudentLname" name="StudentLname" value="@Model.StudentLname" />
+
+        </div>
+        <div class="inputrow">
+            <input type="submit" value="Update Student" />
+
+        </div>
+
+
+
+    </form>
+</div>

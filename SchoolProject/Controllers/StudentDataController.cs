@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Web.Http;
 using SchoolProject.Models;
 using MySql.Data.MySqlClient;
+using System.Diagnostics;
 
 namespace SchoolProject.Controllers
 {
@@ -66,20 +67,20 @@ namespace SchoolProject.Controllers
 
                
     
-                Student NewStudent = new Student();
+                Student StudentInfo = new Student();
 
                 //new student has properties associated to it from database
                 string StudentFname = ResultSet["studentfname"].ToString();
                 string StudentLname = ResultSet["studentlname"].ToString();
                 int StudentID = Convert.ToInt32(ResultSet["studentid"]); //keep as convert.ToInt32!!!!
 
-                //NewStudent definitions
-                NewStudent.StudentFname = StudentFname;
-                NewStudent.StudentLname = StudentLname;
-                NewStudent.StudentId = StudentID;
+                //StudentInfo definitions
+                StudentInfo.StudentFname = StudentFname;
+                StudentInfo.StudentLname = StudentLname;
+                StudentInfo.StudentId = StudentID;
 
-                //Student objects are added to NewStudent
-                Students.Add(NewStudent);
+                //Student objects are added to StudentInfo
+                Students.Add(StudentInfo);
             }
 
             //Close the connetion between MySQL Database and the WebServer
@@ -109,7 +110,7 @@ namespace SchoolProject.Controllers
             MySqlDataReader ResultSet = cmd.ExecuteReader(); //cmd.executereader is a result set
 
             //Create an empty list of Students List 
-            Student NewStudent = new Student();
+            Student StudentInfo = new Student();
 
             //Loop through each row the result set
             while (ResultSet.Read())
@@ -117,19 +118,48 @@ namespace SchoolProject.Controllers
 
                 string StudentFname = ResultSet["studentfname"].ToString();
                 string StudentLname = ResultSet["studentlname"].ToString();
+                //string StudentNumber =ResultSet["studentnumber"].ToString);
                 int StudentID = Convert.ToInt32(ResultSet["studentid"]);
 
-                //NewStudent definitions
-                NewStudent.StudentFname = StudentFname;
-                NewStudent.StudentLname = StudentLname;
-                NewStudent.StudentId = StudentID;
+                //StudentInfo definitions
+                StudentInfo.StudentFname = StudentFname;
+                StudentInfo.StudentLname = StudentLname;
+               // StudentInfo.StudentNumber = StudentNumber; 
+                StudentInfo.StudentId = StudentID;
 
                
             }
 
-            return NewStudent; 
+            return StudentInfo; 
 
             
+        }
+
+        public void UpdateStudent (int id, [FromBody]Student StudentInfo) //not expecting to return anything, use "void" 
+        {
+            //Create an instance of a connection
+            MySqlConnection Conn = School.AccessDatabase();
+
+            Debug.WriteLine(StudentInfo.StudentFname);
+
+            //open connection between server and database
+            Conn.Open();
+
+            //Establish a new command (query) for our database
+            MySqlCommand cmd = Conn.CreateCommand();
+
+            //SQL Query
+            cmd.CommandText = "UPDATE students SET (studentfname= @StudentFname, studentlname=@StudentLname) where authorid=@AuthorId";
+            //need a where studentId so that a specific student is updated and not all students
+            cmd.Parameters.AddWithValue("@StudentFname", StudentInfo.StudentFname);
+            cmd.Parameters.AddWithValue("@StudentLname", StudentInfo.StudentLname);
+            cmd.Parameters.AddWithValue("@AuthorId", id);
+            cmd.Prepare();
+
+            cmd.ExecuteNonQuery(); //only 1 row should be affected by this update statement
+
+            Conn.Close();
+
         }
     }
 

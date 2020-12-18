@@ -168,7 +168,7 @@ namespace SchoolProject.Controllers
             //Establish a new command(query) for our database
             MySqlCommand cmd = Conn.CreateCommand();
 
-            cmd.CommandText = "DELETE from teachers where teacherid = @id";
+            cmd.CommandText = "DELETE from teachers where teacherid=@id";
 
             cmd.Parameters.AddWithValue("@id", id);
           
@@ -217,13 +217,13 @@ namespace SchoolProject.Controllers
 
             //SQL QUERY: 
             //query to the database using SQL query language
-            cmd.CommandText = "INSERT INTO Teachers (TeacherFname, TeacherLname, hiredate) values (@TeacherFname, @TeacherLname, @hiredate)";
+            cmd.CommandText = "INSERT INTO Teachers (TeacherFname, TeacherLname, employeenumber, hiredate, salary) values (@TeacherFname, @TeacherLname, @EmployeeNumber, @HireDate, @Salary)";
             //Set the parameters
             cmd.Parameters.AddWithValue("@TeacherFname", NewTeacher.TeacherFname);
             cmd.Parameters.AddWithValue("@TeacherLname", NewTeacher.TeacherLname);
-            //cmd.Parameters.AddWithValue("@EmployeeNumber", NewTeacher.EmployeeNumber);
+            cmd.Parameters.AddWithValue("@EmployeeNumber", NewTeacher.EmployeeNumber);
             cmd.Parameters.AddWithValue("@Hiredate", NewTeacher.HireDate);
-            //cmd.Parameters.AddWithValue("@salary", NewTeacher.salary);
+            cmd.Parameters.AddWithValue("@salary", NewTeacher.Salary);
 
             cmd.Prepare();
 
