@@ -15,7 +15,11 @@ namespace SchoolProject.Controllers
     //type of controller
     {
         // The database context class which allows us to access our MySQL Database.
-        private SchoolDbContext School = new SchoolDbContext(); //1. new instance of a class as teacher object
+        //private SchoolDbContext School = new SchoolDbContext(); //1. new instance of a class as teacher object
+
+        //Database context class which allows access to MySQL database
+        //AccessDatabase switched to static method - can be called w/o an object
+        MySqlConnection Conn = SchoolDbContext.AccessDatabase();
 
         //This Controller will access the teachers table of our teacher database
         /// <summary>
@@ -29,65 +33,91 @@ namespace SchoolProject.Controllers
         //configure the route attribute for the searchkey for form
         //? means that the information may or may not be included
         [Route("api/TeacherData/ListTeachers/{SearchKey?}")]
+        [EnableCors(origins: "*", methods: "*", headers: "*")]
         public IEnumerable<Teacher> ListTeachers(string SearchKey = null) //2. method  = List Teachers as a string
         {
             //Create an instance of a connection
-            MySqlConnection Conn = School.AccessDatabase();
-
-            //OPen the conn or connection between the web server and database
-            Conn.Open();
-
-            //Establish a new command (query) for our database 
-            MySqlCommand cmd = Conn.CreateCommand();
-
-            //SQL Query
-            cmd.CommandText = "Select * from Teachers where lower(teacherfname) like lower(@key) or lower(teacherlname) like lower(@key) or lower(concat(teacherfname, ' ', teacherlname)) like lower(@key)";
-            //lower means lowercase
-            //commandtext is public This is s command object. represents a string
-
-            //security: anything that is included - the @ key is the search key
-            //don't have to worry about tampering with SQL injection attacks. 
-            //Any strange characters will get stripped out
-            cmd.Parameters.AddWithValue("@key", "%" + SearchKey + "%");
-            cmd.Prepare();
-
-            //Gather Result Set of Query into a variable
-            MySqlDataReader ResultSet = cmd.ExecuteReader(); //cmd.executereader is a result set 
-
+            //this is moved above and changed into static method
+            // MySqlConnection Conn = School.AccessDatabase();
 
             //Create an empty list of Teachers
             //what it does:  finds the teacher names and adds them to a new list
             List<Teacher> Teachers = new List<Teacher> { };
 
-            //Loop Through Each Row the Result Set 
-            //read method will proceed through list via rows. result set will return a dual data type
-            // 1 loop will result in one result set. ex. if 300 teachers - will loop 300 times
-            while (ResultSet.Read())
+            try
             {
-                //Access Column information by the DB column name as an index
-                int TeacherId = Convert.ToInt32(ResultSet["teacherid"]); //keep as Convert.ToInt32; int does not work
-                string TeacherFname = ResultSet["teacherfname"].ToString();
-                string TeacherLname = ResultSet["teacherlname"].ToString();
-                
-                //Access the Teacher hiredate - safter way by parsing the result into a string 
-               // DateTime TeacherHireDate;
-                //DateTime.TryParse(ResultSet["hiredate"].ToString(), out TeacherHireDate);
 
 
-                //Create a new teacher object
-                Teacher NewTeacher = new Teacher();
-                NewTeacher.TeacherId = TeacherId; //TeacherId on left refers to teacher.cs class from Models folder
-                NewTeacher.TeacherFname = TeacherFname;
-                NewTeacher.TeacherLname = TeacherLname;
-                //NewTeacher.TeacherHireDate = TeacherHireDate;
+                //OPen the conn or connection between the web server and database
+                Conn.Open();
+
+                //Establish a new command (query) for our database 
+                MySqlCommand cmd = Conn.CreateCommand();
+
+                //SQL Query
+                cmd.CommandText = "Select * from Teachers where lower(teacherfname) like lower(@key) or lower(teacherlname) like lower(@key) or lower(concat(teacherfname, ' ', teacherlname)) like lower(@key)";
+                //lower means lowercase
+                //commandtext is public This is s command object. represents a string
+
+                //security: anything that is included - the @ key is the search key
+                //don't have to worry about tampering with SQL injection attacks. 
+                //Any strange characters will get stripped out
+                cmd.Parameters.AddWithValue("@key", "%" + SearchKey + "%");
+                cmd.Prepare();
+
+                //Gather Result Set of Query into a variable
+                MySqlDataReader ResultSet = cmd.ExecuteReader(); //cmd.executereader is a result set 
 
 
-                //Add the Teacher  to the List of teachers
-                Teachers.Add(NewTeacher);
+
+
+                //Loop Through Each Row the Result Set 
+                //read method will proceed through list via rows. result set will return a dual data type
+                // 1 loop will result in one result set. ex. if 300 teachers - will loop 300 times
+                while (ResultSet.Read())
+                {
+                    //Access Column information by the DB column name as an index
+                    int TeacherId = Convert.ToInt32(ResultSet["teacherid"]); //keep as Convert.ToInt32; int does not work
+                    string TeacherFname = ResultSet["teacherfname"].ToString();
+                    string TeacherLname = ResultSet["teacherlname"].ToString();
+                    DateTime HireDate = (DateTime)ResultSet["hiredate"];
+
+                    //Access the Teacher hiredate - safter way by parsing the result into a string 
+                    // DateTime TeacherHireDate;
+                    //DateTime.TryParse(ResultSet["hiredate"].ToString(), out TeacherHireDate);
+
+
+                    //Create a new teacher object
+                    Teacher NewTeacher = new Teacher();
+                    NewTeacher.TeacherId = TeacherId; //TeacherId on left refers to teacher.cs class from Models folder
+                    NewTeacher.TeacherFname = TeacherFname;
+                    NewTeacher.TeacherLname = TeacherLname;
+                    NewTeacher.HireDate = HireDate;
+
+
+                    //Add the Teacher  to the List of teachers
+                    Teachers.Add(NewTeacher);
+                }
+
             }
+            catch (MySqlException ex)
+            {
+                //Catches issues with MySQL
+                Debug.WriteLine(ex);
+                throw new ApplicationException("Issue was a database issue.", ex);
+            }
+            catch (Exception ex)
+            {
+                //Catches generic issues
+                Debug.Write(ex);
+                throw new ApplicationException("There was a server issue", ex);
+            }
+            finally
+            {
 
-            //Close the connection between the MySQL Database and the WebServer
-            Conn.Close();
+                //Close the connection between the MySQL Database and the WebServer
+                Conn.Close();
+            }
 
             //Return the final list of teachers 
             return Teachers;
@@ -102,47 +132,77 @@ namespace SchoolProject.Controllers
         /// <example>api/TeachrData/FindTeacher/10 -> {Teacher Object}</example>
 
         [HttpGet]
-        [Route("api/TeacherData/FindTeacher/{id}")]
+        [EnableCors(origins: "*", methods: "*", headers: "*")]
+        //[Route("api/TeacherData/FindTeacher/{id}")]
         public Teacher FindTeacher(int id)
         {
             Teacher NewTeacher = new Teacher();
 
-            //Create an instance of a connection
-            MySqlConnection Conn = School.AccessDatabase();
-
-            //OPen the conn or connection between the web server and database
-            Conn.Open();
-
-            //Establish a new command (query) for our database 
-            MySqlCommand cmd = Conn.CreateCommand();
-
-            //SQL Query
-            cmd.CommandText = "select * from teachers where teacherid =  @id"; //commandtext is public This is s command object. represents a string
-            cmd.Parameters.AddWithValue("@id", id);
-            cmd.Prepare();
-
-            //Gather Result Set of Query into a variable
-            MySqlDataReader ResultSet = cmd.ExecuteReader(); //cmd.executereader is a result set 
-
-            //loops through the database depending on the number of rows
-            while (ResultSet.Read())
+            try
             {
-                //Access Column info by the DB column name as an index
-                int TeacherId = Convert.ToInt32(ResultSet ["teacherid"]);
-                string TeacherFname = ResultSet["teacherfname"].ToString();
-                string TeacherLname = ResultSet["teacherlname"].ToString();
 
-                //access the teacher hire date -safer way by parsing the result into a string
-                // DateTime TeacherHireDate;
-                //DateTime.TryParse(ResultSet["hiredate"].ToString(), out TeacherHireDate);
+                //Create an instance of a connection
+                // MySqlConnection Conn = School.AccessDatabase();
 
-                NewTeacher.TeacherId = TeacherId;
-                NewTeacher.TeacherFname = TeacherFname;
-                NewTeacher.TeacherLname = TeacherLname;
-                //NewTeacher.TeacherHireDate = TeacherHireDate;
+                //OPen the conn or connection between the web server and database
+                Conn.Open();
+
+                //Establish a new command (query) for our database 
+                MySqlCommand cmd = Conn.CreateCommand();
+
+                //SQL Query
+                cmd.CommandText = "SELECT * from teachers where teacherid =  @id"; //commandtext is public This is s command object. represents a string
+                cmd.Parameters.AddWithValue("@id", id);
+                cmd.Prepare();
+
+                //Gather Result Set of Query into a variable
+                MySqlDataReader ResultSet = cmd.ExecuteReader(); //cmd.executereader is a result set 
+
+                //loops through the database depending on the number of rows
+                while (ResultSet.Read())
+                {
+                    //Access Column info by the DB column name as an index
+                    int TeacherId = Convert.ToInt32(ResultSet["teacherid"]);
+                    string TeacherFname = ResultSet["teacherfname"].ToString();
+                    string TeacherLname = ResultSet["teacherlname"].ToString();
+
+                    //access the teacher hire date -safer way by parsing the result into a string
+                    // DateTime TeacherHireDate;
+                    //DateTime.TryParse(ResultSet["hiredate"].ToString(), out TeacherHireDate);
+
+                    NewTeacher.TeacherId = TeacherId;
+                    NewTeacher.TeacherFname = TeacherFname;
+                    NewTeacher.TeacherLname = TeacherLname;
+                    //NewTeacher.TeacherHireDate = TeacherHireDate;
+                }
+                //checking for model validity after pulling fron the DB
+                if (!NewTeacher.IsValid()) throw new HttpResponseException(HttpStatusCode.NotFound);
+            }
+            catch (HttpResponseException ex)
+            {
+                Debug.WriteLine(ex);
+                throw new ApplicationException("That teacher was not found.", ex);
+            }
+            catch (MySqlException ex)
+            {
+                //Catches issues with MySQL.
+                Debug.WriteLine(ex);
+                throw new ApplicationException("Issue with database.", ex);
+            }
+            catch (Exception ex)
+            {
+                //Catches generic issues
+                Debug.Write(ex);
+                throw new ApplicationException(" Issue with server.", ex);
+            }
+            finally
+            {
+                //Close the connection between the MySQL Database and the WebServer
+                Conn.Close();
+
             }
 
-            Conn.Close();
+
 
             return NewTeacher;
         }
@@ -157,26 +217,46 @@ namespace SchoolProject.Controllers
 
         //need to specify a return type: void. This means that nothing needs to be returned
         [HttpPost]
+        [EnableCors(origins: "*", methods: "*", headers: "*")]
         public void DeleteTeacher(int id)
         {
-            //Create an instance of a connection
-            MySqlConnection Conn = School.AccessDatabase();
+            try
+            {
+                //Create an instance of a connection
+                //MySqlConnection Conn = School.AccessDatabase();
 
-            //Open the conn or connection between the web server and database
-            Conn.Open();
+                //Open the conn or connection between the web server and database
+                Conn.Open();
 
-            //Establish a new command(query) for our database
-            MySqlCommand cmd = Conn.CreateCommand();
+                //Establish a new command(query) for our database
+                MySqlCommand cmd = Conn.CreateCommand();
 
-            cmd.CommandText = "DELETE from teachers where teacherid=@id";
+                //SQL Query
+                cmd.CommandText = "DELETE from teachers where teacherid=@id";
 
-            cmd.Parameters.AddWithValue("@id", id);
-          
-            cmd.Prepare();
+                cmd.Parameters.AddWithValue("@id", id);
+                cmd.Prepare();
 
-            cmd.ExecuteNonQuery();
+                cmd.ExecuteNonQuery();
 
-            Conn.Close();
+            }
+            catch (MySqlException ex)
+            {
+                //Catches issues with MySQL
+                Debug.WriteLine(ex);
+                throw new ApplicationException("Issue was a database issue.", ex);
+            }
+            catch (Exception ex)
+            {
+                //Catches generic issues
+                Debug.Write(ex);
+                throw new ApplicationException("There was a server issue.", ex);
+            }
+            finally
+            {
+                Conn.Close();
+            }
+
         }
 
 
@@ -200,83 +280,130 @@ namespace SchoolProject.Controllers
         // must download and install Cors
 
         [HttpPost]
-        [EnableCors(origins: "*", methods:"*", headers:"*" )]
-         // Input an teacher object
-         public void AddTeacher([FromBody]Teacher NewTeacher)
+        [EnableCors(origins: "*", methods: "*", headers: "*")]
+        // Input an teacher object
+        public void AddTeacher([FromBody] Teacher NewTeacher)
         {
             //Create an instance of a connectoin
-            MySqlConnection Conn = School.AccessDatabase();
+            //MySqlConnection Conn = School.AccessDatabase();
 
-            Debug.WriteLine(NewTeacher.TeacherFname);
+            //Exit method if model fields are not included.
+            if (!NewTeacher.IsValid()) throw new ApplicationException("Posted Data was not valid.");
 
-            //Open the connection between server and database
-            Conn.Open();
+            try
+            {
 
-            //Create a new command (query) for the database
-            MySqlCommand cmd = Conn.CreateCommand();
+                //Open the connection between server and database
+                Conn.Open();
 
-            //SQL QUERY: 
-            //query to the database using SQL query language
-            cmd.CommandText = "INSERT INTO Teachers (TeacherFname, TeacherLname, employeenumber, hiredate, salary) values (@TeacherFname, @TeacherLname, @EmployeeNumber, @HireDate, @Salary)";
-            //Set the parameters
-            cmd.Parameters.AddWithValue("@TeacherFname", NewTeacher.TeacherFname);
-            cmd.Parameters.AddWithValue("@TeacherLname", NewTeacher.TeacherLname);
-            cmd.Parameters.AddWithValue("@EmployeeNumber", NewTeacher.EmployeeNumber);
-            cmd.Parameters.AddWithValue("@Hiredate", NewTeacher.HireDate);
-            cmd.Parameters.AddWithValue("@salary", NewTeacher.Salary);
+                //Create a new command (query) for the database
+                MySqlCommand cmd = Conn.CreateCommand();
 
-            cmd.Prepare();
+                //SQL QUERY: 
+                //query to the database using SQL query language
+                cmd.CommandText = "INSERT into Teachers (TeacherFname, TeacherLname, employeenumber, hiredate, salary) values (@TeacherFname, @TeacherLname, @EmployeeNumber, @HireDate, @Salary)";
+                //Set the parameters
+                cmd.Parameters.AddWithValue("@TeacherFname", NewTeacher.TeacherFname);
+                cmd.Parameters.AddWithValue("@TeacherLname", NewTeacher.TeacherLname);
+                //cmd.Parameters.AddWithValue("@EmployeeNumber", NewTeacher.EmployeeNumber);
+                cmd.Parameters.AddWithValue("@Hiredate", NewTeacher.HireDate);
+                cmd.Parameters.AddWithValue("@salary", NewTeacher.Salary);
 
-            cmd.ExecuteNonQuery();
+                cmd.Prepare();
 
-            // get the last inserted id when showing the Teacher immediately after creating it 
+                cmd.ExecuteNonQuery();
 
-            Conn.Close();
+                // get the last inserted id when showing the Teacher immediately after creating it 
 
-         }
+                Conn.Close();
+            }
+            catch (MySqlException ex)
+            {
+                //Catches issues with MySQL.
+                Debug.WriteLine(ex);
+                throw new ApplicationException("Issue was a database issue.", ex);
+            }
+            catch (Exception ex)
+            {
+                //Catches generic issues
+                Debug.Write(ex);
+                throw new ApplicationException("There was a server issue.", ex);
+            }
+            finally
+            {
+                //Close the connection between the MySQL Database and the WebServer
+                Conn.Close();
 
-
-    /// <summary>
-    /// Updates an Teacher on the MySQL Database. Non-Deterministic.
-    /// </summary>
-    /// <param name="TeacherInfo">An object with fields that map to the columns of the teachers's table.</param>
-    /// <example>
-    /// POST api/TeacherData/UpdateTeacher/208 
-    /// FORM DATA / POST DATA / REQUEST BODY 
-    /// {
-    ///
-    ///     "TeacherFname: "Martha",
-    ///     "TeacherLname: "Lee",
-    ///  
-    /// }
-    /// </example>
-    public void UpdateTeacher(int id, [FromBody]Teacher TeacherInfo)
-        {
-            //Create an instance of a connection
-            MySqlConnection Conn = School.AccessDatabase();
-
-            Debug.WriteLine(TeacherInfo.TeacherFname);
-
-            //Open the connection between the web server and database
-            Conn.Open();
-
-            //Establish a new command (query) for our database
-            MySqlCommand cmd = Conn.CreateCommand();
-
-            //SQL QUERY
-            cmd.CommandText = "UPDATE teachers set teacherfname=@TeacherFname, teacherlname=@TeacherLname  where teacherid=@TeacherId";
-            cmd.Parameters.AddWithValue("@TeacherFname", TeacherInfo.TeacherFname);
-            cmd.Parameters.AddWithValue("@TeacherLname", TeacherInfo.TeacherLname);
-            cmd.Parameters.AddWithValue("@TeacherId", id);
-            cmd.Prepare();
-
-            cmd.ExecuteNonQuery();
-
-            Conn.Close();
-
+            }
 
         }
 
+
+        /// <summary>
+        /// Updates an Teacher on the MySQL Database. Non-Deterministic.
+        /// </summary>
+        /// <param name="TeacherInfo">An object with fields that map to the columns of the teachers's table.</param>
+        /// <example>
+        /// POST api/TeacherData/UpdateTeacher/208 
+        /// FORM DATA / POST DATA / REQUEST BODY 
+        /// {
+        ///
+        ///     "TeacherFname: "Martha",
+        ///     "TeacherLname: "Lee",
+        ///  
+        /// }
+        /// </example>
+        /// 
+
+        [HttpPost]
+        [EnableCors(origins: "*", methods: "*", headers: "*")]
+        public void UpdateTeacher(int id, [FromBody] Teacher TeacherInfo)
+        {
+
+            //Exit method if model fields are not included.
+            if (!TeacherInfo.IsValid()) throw new ApplicationException("Posted Data was not valid.");
+
+            try
+            {
+                //Open the connection between the web server and database
+                Conn.Open();
+
+                //Establish a new command (query) for our database
+                MySqlCommand cmd = Conn.CreateCommand();
+
+
+
+                //SQL QUERY
+                cmd.CommandText = "UPDATE teachers set teacherfname=@TeacherFname, teacherlname=@TeacherLname  where teacherid=@TeacherId";
+                cmd.Parameters.AddWithValue("@TeacherFname", TeacherInfo.TeacherFname);
+                cmd.Parameters.AddWithValue("@TeacherLname", TeacherInfo.TeacherLname);
+                cmd.Parameters.AddWithValue("@TeacherId", id);
+                cmd.Prepare();
+
+                cmd.ExecuteNonQuery();
+
+
+            }
+            catch (MySqlException ex)
+            {
+                //Catches issues with MySQL.
+                Debug.WriteLine(ex);
+                throw new ApplicationException("Issue was a database issue.", ex);
+            }
+            catch (Exception ex)
+            {
+                //Catches generic issues
+                Debug.Write(ex);
+                throw new ApplicationException("There was a server issue.", ex);
+            }
+            finally
+            {
+                //Close the connection between the MySQL Database and the WebServer
+                Conn.Close();
+
+            }
+
+        }
 
     }
 }

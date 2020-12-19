@@ -15,10 +15,10 @@ namespace SchoolProject.Models.ViewModels
         public Teacher Teacher;
 
         //Courses Taught:
-        public IEnumerable<Course>CourseTaught;
+        public IEnumerable<Course>CoursesTaught;
 
         //Students
-        public IEnumerable<Student> StudentTaught;
+        public IEnumerable<Student> StudentsTaught;
 
 
     }

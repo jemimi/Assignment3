@@ -15,10 +15,10 @@ namespace SchoolProject.Controllers
     {
 
         // The database context class which allows us to access our MySQL Database.
-        private SchoolDbContext School = new SchoolDbContext(); //1. new instance of a class as blog object
+        //private SchoolDbContext School = new SchoolDbContext(); //1. new instance of a class as blog object
 
         //Create an instance of a connection
-        //MySqlConnection Conn = SchoolDbContext.AccessDatabase();
+        MySqlConnection Conn = SchoolDbContext.AccessDatabase();
 
 
         //This Controller will access the classes table of our blog database
@@ -36,7 +36,7 @@ namespace SchoolProject.Controllers
         [EnableCors(origins: "*", methods: "*", headers: "*")]
         public IEnumerable<Course> ListCourses(string SearchKey = null)
         {
-            MySqlConnection Conn = School.AccessDatabase();
+            
 
             //Create an empty list of Courses
             List<Course> Courses = new List<Course> { };
@@ -129,9 +129,7 @@ namespace SchoolProject.Controllers
         public IEnumerable<Course> GetCoursesForTeacher(int TeacherId)
         {
 
-            //Create an instance of a connection
-            MySqlConnection Conn = School.AccessDatabase();
-
+            
             //Create an empty list of Courses
             List<Course> Courses = new List<Course> { };
             try
@@ -216,8 +214,7 @@ namespace SchoolProject.Controllers
         public Course FindCourse(int id) //Findcourse links with the CourseController.cs 
         {
 
-            //Create an instance of a connection
-            MySqlConnection Conn = School.AccessDatabase();
+            
 
             Course NewCourse = new Course();
 
@@ -306,9 +303,7 @@ namespace SchoolProject.Controllers
         [EnableCors(origins: "*", methods: "*", headers: "*")]
         public void DeleteCourse(int id)
         {
-            //Create an instance of a connection
-            MySqlConnection Conn = School.AccessDatabase();
-
+            
 
             try
             {
@@ -371,8 +366,7 @@ namespace SchoolProject.Controllers
         public void AddCourse([FromBody] Course NewCourse)
         {
 
-            //Create an instance of a connection
-            MySqlConnection Conn = School.AccessDatabase();
+            
 
             //Exit method if model fields are not incuded
             if (!NewCourse.IsValid()) throw new ApplicationException("Posted Data not valid");
@@ -397,7 +391,7 @@ namespace SchoolProject.Controllers
 
                 cmd.ExecuteNonQuery();
 
-                Conn.Close();
+              
 
             }
             catch (MySqlException ex)
@@ -437,8 +431,7 @@ namespace SchoolProject.Controllers
         [EnableCors(origins: "*", methods: "*", headers: "*")]
         public void UpdateCourse(int id, [FromBody] Course CourseInfo)
         {
-            //Create an instance of a connection
-            MySqlConnection Conn = School.AccessDatabase();
+            
 
             //Exit method if model fields are not included.
             if (!CourseInfo.IsValid()) throw new ApplicationException("Posted Data was not valid.");

@@ -10,24 +10,45 @@ namespace SchoolProject.Controllers
 {
     public class StudentController : Controller
     {
+
+        //We can instantiate the Studentcontroller outside of each method
+        private StudentDataController controller = new StudentDataController();
+
+        //GET : /Student/Error
+        /// <summary>
+        /// This window is for showing Student Specific Errors!
+        /// </summary>
+        public ActionResult Error()
+        {
+            return View();
+        }
+
         // GET: Student
         public ActionResult Index()
         {
             return View();
         }
 
-        //GET: //Article/List <=== many articles
+        //GET: //Student/List <=== many Students
 
-        public ActionResult List(string StudentSearchKey)
+        public ActionResult List(string SearchKey = null)
         {
-            //need to add using System Diagnositcs to use this debug line
-            Debug.WriteLine("The search is " + StudentSearchKey);
+            try
+            {
+                //Get a list of students
+               
 
-            StudentDataController Controller = new StudentDataController();
-            
-            IEnumerable<Student> Students = Controller.ListStudents(StudentSearchKey);
+                IEnumerable<Student> Students = Controller.ListStudents(SearchKey);
+                return View(Students);
 
-            return View(Students);
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+                return RedirectToAction("Error", "Home");
+            }
+
+           
         }
 
 
@@ -42,11 +63,22 @@ namespace SchoolProject.Controllers
 
         public ActionResult Show(int id)
         {
-            StudentDataController Controller = new StudentDataController();
+            try
+            {
+                
 
-            Student SelectedStudent = Controller.FindStudent(id);
+                Student SelectedStudent = Controller.FindStudent(id);
 
-            return View(SelectedStudent);  //think about the semantic elements - instead of "new" choose "selected" 
+                return View(SelectedStudent);  //think about the semantic elements - instead of "new" choose "selected" 
+
+            }
+
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+                return RedirectToAction("Error", "Home");
+            }
+           
         }
 
 
@@ -88,8 +120,8 @@ namespace SchoolProject.Controllers
             StudentInfo.StudentFname = StudentFname;
             StudentInfo.StudentLname = StudentLname;
 
-            StudentDataController controller = new StudentDataController();
-            controller.UpdateStudent(id, StudentInfo);
+            StudentDataController Controller = new StudentDataController();
+            Controller.UpdateStudent(id, StudentInfo);
 
             return RedirectToAction("Show" + id); //this allows us to redirect to the consequences of our actions 
         }

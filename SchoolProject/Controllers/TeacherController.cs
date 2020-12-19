@@ -5,6 +5,7 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using SchoolProject.Models;
+using SchoolProject.Models.ViewModels;
 using System.Diagnostics;
 
 
@@ -12,32 +13,85 @@ namespace SchoolProject.Controllers
 {
     public class TeacherController : Controller
     {
+        //instantiate Teacher controller outside of each method: 
+        private TeacherDataController teacherdatacontroller = new TeacherDataController();
+
+        //need to also get related article data for this author to be displayed via view models 
+        private CourseDataController coursedatacontroller = new CourseDataController();
+
+        //also get related student data for teacher
+        private StudentDataController studentdatacontroller = new StudentDataController();
+
+
+        //GET : /Teacher/Error
+
+        /// <summary>
+        /// Shows specific errors for Teachers
+        /// </summary>
+        /// <returns></returns>
+
+        public ActionResult Error()
+        {
+            return View();
+        }
+
         // GET: Teacher
         public ActionResult Index()
         {
             return View();
         }
+
+
         //GET: /Teacher/List
         //method that links to specific page:  list.cshtml 
         public ActionResult List(string SearchKey = null)
         {
-            TeacherDataController controller = new TeacherDataController();
-            IEnumerable<Teacher> Teachers = controller.ListTeachers(SearchKey);
-
-            return View(Teachers);
+            try
+            {
+                //tries to get a list of authors.... 
+                IEnumerable<Teacher> Teachers = teacherdatacontroller.ListTeachers(SearchKey);
+                return View(Teachers);
+            }
+            catch ( Exception ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+                //Debug.WriteLien(ex.Message);
+                return RedirectToAction("Error", "Home");
+            }
         }
+
+        //GET: /Teacher/Ajax_List
+        public ActionResult Ajax_List()
+        {
+            return View();
+        }
+
 
 
         //GET : /Teacher/Show/{id}
         //Set up for displaying the assigned class to a teacher
         public ActionResult Show(int id)
         {
+            try
+            {
+                //View model connection here to show associated info (students and courses)
+                ShowTeacher ViewModel = new ShowTeacher();
 
-            TeacherDataController controller = new TeacherDataController();
-            Teacher SelectedTeacher = controller.FindTeacher(id);
-            //Course NewCourse = controller.FindClass();  //assigned class
+                Teacher SelectedTeacher = teacherdatacontroller.FindTeacher(id);
+                IEnumerable<Course> CoursesTaught = coursedatacontroller.GetCoursesForTeacher(id);
+                ViewModel.Teacher = SelectedTeacher;
+                ViewModel.CoursesTaught = CoursesTaught;
+                
 
-            return View(SelectedTeacher);
+                
+
+                return View(ViewModel);  //viewmodel needs to pass through to the view
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+                return RedirectToAction("Error", "Home");
+            }
         }
 
         
@@ -45,20 +99,36 @@ namespace SchoolProject.Controllers
         //GET : /Teacher/DeleteConfirm/{id}
         public ActionResult DeleteConfirm(int id)
         {
-            TeacherDataController controller = new TeacherDataController();
-            Teacher NewTeacher = controller.FindTeacher(id);
+            try
+            {
 
+                
+                Teacher NewTeacher = teacherdatacontroller.FindTeacher(id);
 
-            return View(NewTeacher);
+                return View(NewTeacher);
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+                return RedirectToAction("Error", "Home");
+            }
         }
 
         //POST: /Teacher/Delete/{id}
         [HttpPost]
         public ActionResult Delete(int id)
         {
-            TeacherDataController controller = new TeacherDataController();
-            controller.DeleteTeacher(id);
-            return RedirectToAction("List");
+            try
+            {
+               
+                teacherdatacontroller.DeleteTeacher(id);
+                return RedirectToAction("List");
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+                return RedirectToAction("Error", "Home");
+            }
         }
 
         //GET : /Teacher/New
@@ -72,42 +142,36 @@ namespace SchoolProject.Controllers
         //refer to the TeacherDataController for connection to Cors in order to add new Teacher to SQL database
         //See teacherdatacontroller, teacher.js, Ajax_New.cshtml 
         public ActionResult Ajax_New()
-        {
-
-            Teacher TeacherInfo = new Teacher();
+        {     
             
             return View();
         }
 
-        //refers to the view>teacher_setting.cshtml
-        public ActionResult Teacher_Setting()
-        {
-            return View();
-        }
-
+   
 
 
         //POST: /Teacher/Create
         [HttpPost]
-        public ActionResult Create(string TeacherFname, string TeacherLname, string EmployeeNumber, DateTime HireDate, decimal Salary )
+        public ActionResult Create(string TeacherFname, string TeacherLname,  DateTime HireDate, decimal Salary) //not working so took out : string EmployeeNumber,
         {
-            //Identify that this method is running
-            //Identify the inputs provided from the form
+            try
+            {
+                Teacher NewTeacher = new Teacher();
+                NewTeacher.TeacherFname = TeacherFname;
+                NewTeacher.TeacherLname = TeacherLname;
+               // NewTeacher.EmployeeNumber EmployeeNumber; //
+                NewTeacher.HireDate = HireDate;
+                NewTeacher.Salary = Salary;
 
-            Debug.WriteLine("Access to Create Method");
-            Debug.WriteLine(TeacherFname);
-            Debug.WriteLine(TeacherLname);
+                teacherdatacontroller.AddTeacher(NewTeacher);
+            }
+            catch(Exception ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+                return RedirectToAction("Error", "Home");
+            }
 
-            Teacher NewTeacher = new Teacher();
-            NewTeacher.TeacherFname = TeacherFname;
-            NewTeacher.TeacherLname = TeacherLname;
-            NewTeacher.EmployeeNumber EmployeeNumber; //
-            NewTeacher.HireDate = HireDate;
-            NewTeacher.Salary = Salary; 
-
-
-            TeacherDataController controller = new TeacherDataController();
-            controller.AddTeacher(NewTeacher);
+           
 
             return RedirectToAction("List");
         }
@@ -121,16 +185,39 @@ namespace SchoolProject.Controllers
         /// <example>GET : /Teacher/Update/5</example>
         public ActionResult Update(int id)
         {
+            try
+            {
+                
+                Teacher SelectedTeacher = teacherdatacontroller.FindTeacher(id);
 
-            TeacherDataController controller = new TeacherDataController();
-            Teacher SelectedTeacher = controller.FindTeacher(id);
-
-            return View(SelectedTeacher);
+                return View(SelectedTeacher);
+            }
+            catch(Exception ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+                return RedirectToAction("Error", "Home");
+            }
+            
 
         }
 
+
+        public ActionResult Ajax_Update(int id)
+        {
+            try
+            {
+                Teacher SelectedTeacher = teacherdatacontroller.FindTeacher(id);
+                return View(SelectedTeacher);
+            }
+            catch(Exception ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+                return RedirectToAction("Error", "Home");
+            }
+        }
+
         /// <summary>
-        /// Receives a POST request containing information about an existing teacher in the system, with new values. Conveys this information to the API, and redirects to the "Teacher Show" page of our updated teacher.
+        /// Receives a **POST*** request containing information about an existing teacher in the system, with new values. Conveys this information to the API, and redirects to the "Teacher Show" page of our updated teacher.
         /// </summary>
         /// <param name="id">Id of the Teacher to update</param>
         /// <param name="TeacherFname">The updated first name of the teacher</param>
@@ -148,17 +235,25 @@ namespace SchoolProject.Controllers
         [HttpPost]
         public ActionResult Update(int id, string TeacherFname, string TeacherLname)
         {
-            Teacher TeacherInfo = new Teacher();
-            TeacherInfo.TeacherFname = TeacherFname;
-            TeacherInfo.TeacherLname = TeacherLname;
+            try
+            {
+                Teacher TeacherInfo = new Teacher();
+                TeacherInfo.TeacherFname = TeacherFname;
+                TeacherInfo.TeacherLname = TeacherLname;
 
-
-            TeacherDataController controller = new TeacherDataController();
-            controller.UpdateTeacher(id, TeacherInfo);
+                teacherdatacontroller.UpdateTeacher(id, TeacherInfo);
+            }
+            catch(Exception ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+                return RedirectToAction("Error", "Home");
+            }
 
             return RedirectToAction("Show/" + id);
         }
 
     }
+
+
 
 }

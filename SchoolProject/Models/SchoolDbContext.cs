@@ -61,7 +61,7 @@ namespace SchoolProject.Models
         /// List is an object
         /// <returns> A MySqlConnection Object</returns>
 
-        public MySqlConnection AccessDatabase()
+        public static MySqlConnection AccessDatabase()
         {
             //We are instantiating the MySqlConnection Class to create an object
             //the object is a specific connection to our blog database on part 3306 of localhost
